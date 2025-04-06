@@ -57,8 +57,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define PIN_CS_Pin GPIO_PIN_4
-#define PIN_CS_GPIO_Port GPIOC
+//#define ST7735_CS_Pin GPIO_PIN_4
+//#define ST7735_CS_GPIO_Port GPIOC
+//#define ST7735_RES_Pin GPIO_PIN_5
+//#define ST7735_RES_GPIO_Port GPIOC
+//#define ST7735_DC_Pin GPIO_PIN_0
+//#define ST7735_DC_GPIO_Port GPIOB
 #define BUTTON_Pin GPIO_PIN_1
 #define BUTTON_GPIO_Port GPIOB
 #define LED_A_Pin GPIO_PIN_12

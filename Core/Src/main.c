@@ -22,6 +22,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
+#include "st7735.h"
+#include "fonts.h"
+#include "testimg.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,6 +65,88 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void init() {
+  ST7735_Init();
+
+  const char ready[] = "Ready!\r\n";
+  HAL_UART_Transmit(&huart2, (uint8_t*)ready, sizeof(ready)-1, HAL_MAX_DELAY);
+}
+
+void loop() {
+  // Check border
+  ST7735_FillScreen(ST7735_BLACK);
+
+  for(int x = 0; x < ST7735_WIDTH; x++) {
+      ST7735_DrawPixel(x, 0, ST7735_RED);
+      ST7735_DrawPixel(x, ST7735_HEIGHT-1, ST7735_RED);
+  }
+
+  for(int y = 0; y < ST7735_HEIGHT; y++) {
+      ST7735_DrawPixel(0, y, ST7735_RED);
+      ST7735_DrawPixel(ST7735_WIDTH-1, y, ST7735_RED);
+  }
+
+  HAL_Delay(3000);
+
+  // Check fonts
+  ST7735_FillScreen(ST7735_BLACK);
+  ST7735_WriteString(0, 0, "Font_7x10, red on black, lorem ipsum dolor sit amet", Font_7x10, ST7735_RED, ST7735_BLACK);
+  ST7735_WriteString(0, 3*10, "Font_11x18, green, lorem ipsum", Font_11x18, ST7735_GREEN, ST7735_BLACK);
+  ST7735_WriteString(0, 3*10+3*18, "Font_16x26", Font_16x26, ST7735_BLUE, ST7735_BLACK);
+  HAL_Delay(2000);
+
+  // Check colors
+  ST7735_FillScreen(ST7735_BLACK);
+  ST7735_WriteString(0, 0, "BLACK", Font_11x18, ST7735_WHITE, ST7735_BLACK);
+  HAL_Delay(500);
+
+  ST7735_FillScreen(ST7735_BLUE);
+  ST7735_WriteString(0, 0, "BLUE", Font_11x18, ST7735_BLACK, ST7735_BLUE);
+  HAL_Delay(500);
+
+  ST7735_FillScreen(ST7735_RED);
+  ST7735_WriteString(0, 0, "RED", Font_11x18, ST7735_BLACK, ST7735_RED);
+  HAL_Delay(500);
+
+  ST7735_FillScreen(ST7735_GREEN);
+  ST7735_WriteString(0, 0, "GREEN", Font_11x18, ST7735_BLACK, ST7735_GREEN);
+  HAL_Delay(500);
+
+  ST7735_FillScreen(ST7735_CYAN);
+  ST7735_WriteString(0, 0, "CYAN", Font_11x18, ST7735_BLACK, ST7735_CYAN);
+  HAL_Delay(500);
+
+  ST7735_FillScreen(ST7735_MAGENTA);
+  ST7735_WriteString(0, 0, "MAGENTA", Font_11x18, ST7735_BLACK, ST7735_MAGENTA);
+  HAL_Delay(500);
+
+  ST7735_FillScreen(ST7735_YELLOW);
+  ST7735_WriteString(0, 0, "YELLOW", Font_11x18, ST7735_BLACK, ST7735_YELLOW);
+  HAL_Delay(500);
+
+  ST7735_FillScreen(ST7735_WHITE);
+  ST7735_WriteString(0, 0, "WHITE", Font_11x18, ST7735_BLACK, ST7735_WHITE);
+  HAL_Delay(500);
+
+#ifdef ST7735_IS_128X128
+  // Display test image 128x128
+  ST7735_DrawImage(0, 0, ST7735_WIDTH, ST7735_HEIGHT, (uint16_t*)test_img_128x128);
+
+/*
+  // Display test image 128x128 pixel by pixel
+  for(int x = 0; x < ST7735_WIDTH; x++) {
+      for(int y = 0; y < ST7735_HEIGHT; y++) {
+          uint16_t color565 = test_img_128x128[y][x];
+          // fix endiness
+          color565 = ((color565 & 0xFF00) >> 8) | ((color565 & 0xFF) << 8);
+          ST7735_DrawPixel(x, y, color565);
+      }
+  }
+*/
+  HAL_Delay(15000);
+#endif // ST7735_IS_128X128
+
+}
 
 /* USER CODE END 0 */
 
@@ -105,19 +190,15 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  char buffer[] = "Hello world";
-  HAL_GPIO_WritePin(PIN_CS_GPIO_Port,PIN_CS_Pin,1);
-  HAL_SPI_Transmit(&hspi1,buffer,strlen(buffer),1000);
-  HAL_GPIO_WritePin(PIN_CS_GPIO_Port,PIN_CS_Pin,0);
+  init();
 
 
   while (1)
   {
-    HAL_GPIO_WritePin(PIN_CS_GPIO_Port,PIN_CS_Pin,1);
-    HAL_SPI_Transmit(&hspi1,buffer,strlen(buffer),1000);
-    HAL_GPIO_WritePin(PIN_CS_GPIO_Port,PIN_CS_Pin,0);
+
+    loop();
     HAL_GPIO_TogglePin(LED_A_GPIO_Port,LED_A_Pin);
-    HAL_Delay(1000);
+    HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -301,17 +382,27 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(PIN_CS_GPIO_Port, PIN_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, ST7735_CS_Pin|ST7735_RES_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, LED_A_Pin|LED_ERROR_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PIN_CS_Pin */
-  GPIO_InitStruct.Pin = PIN_CS_Pin;
+  /*Configure GPIO pins : ST7735_CS_Pin ST7735_RES_Pin */
+  GPIO_InitStruct.Pin = ST7735_CS_Pin|ST7735_RES_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(PIN_CS_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : ST7735_DC_Pin */
+  GPIO_InitStruct.Pin = ST7735_DC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(ST7735_DC_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BUTTON_Pin */
   GPIO_InitStruct.Pin = BUTTON_Pin;
