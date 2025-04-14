@@ -106,7 +106,7 @@ static void ST7735_WriteCommand(uint8_t cmd) {
 
 static void ST7735_WriteData(uint8_t* buff, size_t buff_size) {
     HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_SET);
-    HAL_SPI_Transmit(&ST7735_SPI_PORT, buff, buff_size, HAL_MAX_DELAY);
+    HAL_SPI_Transmit(&ST7735_SPI_PORT, buff, buff_size,100);
 }
 
 static void ST7735_ExecuteCommandList(const uint8_t *addr) {
@@ -152,25 +152,25 @@ static void ST7735_SetAddressWindow(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t 
 }
 
 void ST7735_Init() {
-    ST7735_Select();
+    //ST7735_Select();
     ST7735_Reset();
     ST7735_ExecuteCommandList(init_cmds1);
     ST7735_ExecuteCommandList(init_cmds2);
     ST7735_ExecuteCommandList(init_cmds3);
-    ST7735_Unselect();
+    //ST7735_Unselect();
 }
 
 void ST7735_DrawPixel(uint16_t x, uint16_t y, uint16_t color) {
     if((x >= ST7735_WIDTH) || (y >= ST7735_HEIGHT))
         return;
 
-    ST7735_Select();
+    //ST7735_Select();
 
     ST7735_SetAddressWindow(x, y, x+1, y+1);
     uint8_t data[] = { color >> 8, color & 0xFF };
     ST7735_WriteData(data, sizeof(data));
 
-    ST7735_Unselect();
+    //ST7735_Unselect();
 }
 
 static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t color, uint16_t bgcolor) {
@@ -210,7 +210,7 @@ static void ST7735_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint
 */
 
 void ST7735_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, uint16_t color, uint16_t bgcolor) {
-    ST7735_Select();
+    //ST7735_Select();
 
     while(*str) {
         if(x + font.width >= ST7735_WIDTH) {
@@ -232,7 +232,7 @@ void ST7735_WriteString(uint16_t x, uint16_t y, const char* str, FontDef font, u
         str++;
     }
 
-    ST7735_Unselect();
+    //ST7735_Unselect();
 }
 
 void ST7735_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
@@ -241,18 +241,18 @@ void ST7735_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16
     if((x + w - 1) >= ST7735_WIDTH) w = ST7735_WIDTH - x;
     if((y + h - 1) >= ST7735_HEIGHT) h = ST7735_HEIGHT - y;
 
-    ST7735_Select();
+    //ST7735_Select();
     ST7735_SetAddressWindow(x, y, x+w-1, y+h-1);
 
     uint8_t data[] = { color >> 8, color & 0xFF };
     HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_SET);
     for(y = h; y > 0; y--) {
         for(x = w; x > 0; x--) {
-            HAL_SPI_Transmit(&ST7735_SPI_PORT, data, sizeof(data), HAL_MAX_DELAY);
+            HAL_SPI_Transmit(&ST7735_SPI_PORT, data, sizeof(data),HAL_MAX_DELAY);
         }
     }
 
-    ST7735_Unselect();
+    //ST7735_Unselect();
 }
 
 void ST7735_FillRectangleFast(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
@@ -261,7 +261,7 @@ void ST7735_FillRectangleFast(uint16_t x, uint16_t y, uint16_t w, uint16_t h, ui
     if((x + w - 1) >= ST7735_WIDTH) w = ST7735_WIDTH - x;
     if((y + h - 1) >= ST7735_HEIGHT) h = ST7735_HEIGHT - y;
 
-    ST7735_Select();
+    //ST7735_Select();
     ST7735_SetAddressWindow(x, y, x+w-1, y+h-1);
 
     // Prepare whole line in a single buffer
@@ -272,10 +272,10 @@ void ST7735_FillRectangleFast(uint16_t x, uint16_t y, uint16_t w, uint16_t h, ui
 
     HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_SET);
     for(y = h; y > 0; y--)
-        HAL_SPI_Transmit(&ST7735_SPI_PORT, line, w * sizeof(pixel), HAL_MAX_DELAY);
+        HAL_SPI_Transmit(&ST7735_SPI_PORT, line, w * sizeof(pixel),HAL_MAX_DELAY);
 
     free(line);
-    ST7735_Unselect();
+    //ST7735_Unselect();
 }
 
 void ST7735_FillScreen(uint16_t color) {
@@ -291,22 +291,22 @@ void ST7735_DrawImage(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const uint
     if((x + w - 1) >= ST7735_WIDTH) return;
     if((y + h - 1) >= ST7735_HEIGHT) return;
 
-    ST7735_Select();
+    //ST7735_Select();
     ST7735_SetAddressWindow(x, y, x+w-1, y+h-1);
     ST7735_WriteData((uint8_t*)data, sizeof(uint16_t)*w*h);
-    ST7735_Unselect();
+    //ST7735_Unselect();
 }
 
 void ST7735_InvertColors(bool invert) {
-    ST7735_Select();
+    //ST7735_Select();
     ST7735_WriteCommand(invert ? ST7735_INVON : ST7735_INVOFF);
-    ST7735_Unselect();
+    //ST7735_Unselect();
 }
 
 void ST7735_SetGamma(GammaDef gamma)
 {
-	ST7735_Select();
+	//ST7735_Select();
 	ST7735_WriteCommand(ST7735_GAMSET);
 	ST7735_WriteData((uint8_t *) &gamma, sizeof(gamma));
-	ST7735_Unselect();
+	//ST7735_Unselect();
 }
