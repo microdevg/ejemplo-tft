@@ -13,14 +13,19 @@ La placa **STM32F407VG** se conecta mediante la interfaz serial **SPI1** a una p
 </p>
 
 ### Tabla de conexiones
+------------------------------------------------
+| STM32F407VG           |  Pantalla TFT ST7735S |
+|-----------------------|-----------------------|
+| SPI1_CLK   `[PA5]`    | SCK                   |
+| SPI1_MOSI  `[PA7]`    | SDA                   |
+| SPI1_MISO  `[PA6]`    | NO SE USA             |
+| ST7735S_DC `[PB0]`    | A0 (dato / cmd)       |
+| ST7735S_CS `[PC4]`    | CS                    |
+| ST7735S_RESET `[PC5]` | RESET                 |
+-------------------------------------------------
 
-| STM32F407VG        | Pantalla TFT ST7735S |
-|--------------------|-----------------------|
-| SPI1_CLK  `[PA5]`  | SCK                   |
-| SPI1_MOSI `[PA7]`  | SDA                   |
-| SPI1_MISO `[PA6]`  | A0                    |
-| ST7735S_CS `[PC4]` | CS                    |
-| ST7735S_RESET `[PC5]` | RESET              |
+Podemos ver que no usamos SPI1_MISO porque el display no devuelve datos. Por otra parte, utilizamos un pin extra llamado ST7735_DC, que sirve para indicar si el flujo a través del SPI1 es un comando o datos.
+
 
 > ⚠️ **Nota:** Verificar la configuración de pines en el archivo `.ioc` del proyecto, utilizando **STM32CubeMX**.
 
